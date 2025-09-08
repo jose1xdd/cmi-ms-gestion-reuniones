@@ -2,7 +2,7 @@ import logging
 from dependency_injector import containers, providers
 from dependency_injector.wiring import Provide, inject
 from fastapi import Depends
-from requests import Session
+from sqlalchemy.orm import Session
 from app.config.database import get_db
 from app.persistence.repository.repository_factory import RepositoryFactory
 from app.persistence.repository.reunion_repository.interface.interface_reunion_repository import IReunionRepository
