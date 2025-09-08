@@ -1,6 +1,6 @@
 from typing import Any, Dict
-from requests import Session
 from sqlalchemy import and_
+from sqlalchemy.orm import Session
 from app.models.outputs.paginated_response import PaginatedReunion
 from app.persistence.models.reunion import Reunion
 from app.persistence.repository.base_repository.impl.base_repository import BaseRepository
