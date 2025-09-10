@@ -7,6 +7,7 @@ from app.models.outputs.response_estado import EstadoResponse
 from app.persistence.models.reunion import Reunion
 from app.persistence.repository.reunion_repository.interface.interface_reunion_repository import IReunionRepository
 from app.utils.exceptions_handlers.models.error_response import AppException
+from app.utils.util_functions import generate_code
 
 
 class ReunionManager:
@@ -107,3 +108,27 @@ class ReunionManager:
         self.reunion_repository.delete(reunion_id)
         self.logger.info(f"Reunión ID={reunion_id} eliminada correctamente")
         return EstadoResponse(estado="Exitoso", message="Reunión eliminada exitosamente")
+
+    def generate_asistencia_code(self, reunion_id: int) -> EstadoResponse:
+        self.logger.info(
+            f"Generando código de asistencia para reunión ID={reunion_id}")
+
+        reunion = self.reunion_repository.get(reunion_id)
+        if not reunion:
+            self.logger.warning(
+                f"No se encontró la reunión con ID={reunion_id}")
+            raise AppException(
+                f"No se encontró reunión con el ID={reunion_id}")
+
+        codigo = generate_code()
+        reunion.codigoAsistencia = codigo
+        self.reunion_repository.update(reunion_id, reunion)
+
+        self.logger.info(
+            f"Código de asistencia generado exitosamente para reunión ID={reunion_id}: {codigo}"
+        )
+
+        return EstadoResponse(
+            estado="Exitoso",
+            message="Código de reunión actualizado exitosamente"
+        )
