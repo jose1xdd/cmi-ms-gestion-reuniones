@@ -26,15 +26,16 @@ def assign_asistencia(
 
 
 @asistencia_router.delete(
-    "/{asistencia_id}",
+    "/{reunion_id}/{persona_id}",
     response_model=EstadoResponse,
     status_code=status.HTTP_200_OK
 )
 def delete_asistencia(
-    asistencia_id: int,
+    reunion_id: int,
+    persona_id: int,
     asistencia_manager: AsistenciaManager = Depends(get_asistencia_manager)
 ):
-    response = asistencia_manager.delete_assistance(asistencia_id)
+    response = asistencia_manager.delete_assistance(reunion_id, persona_id)
     return JSONResponse(content=response.model_dump(exclude_none=True), status_code=200)
 
 @asistencia_router.post(

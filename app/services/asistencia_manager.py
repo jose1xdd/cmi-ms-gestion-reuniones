@@ -51,14 +51,25 @@ class AsistenciaManager:
 
         return EstadoResponse(estado="Exitoso", message="Asistencia creada exitosamente")
 
-    def delete_assistance(self, asistencia_id: int) -> EstadoResponse:
+    def delete_assistance(self, reunion_id: int, persona_id: int) -> EstadoResponse:
+        self.logger.info(
+            f"Intentando eliminar asistencia: reunion_id={reunion_id}, persona_id={persona_id}"
+        )
 
-        # Validar que la asistencia exista
-        asistencia = self.asistencia_repository.get(asistencia_id)
+        asistencia = self.asistencia_repository.get_by_reunion_and_persona(
+            reunion_id, persona_id
+        )
         if asistencia is None:
+            self.logger.warning(
+                f"No existe asistencia para reunion_id={reunion_id}, persona_id={persona_id}"
+            )
             raise AppException("La asistencia no existe")
-        # Eliminar asistencia
-        self.asistencia_repository.delete(asistencia_id)
+
+        self.asistencia_repository.delete(asistencia.id)
+        self.logger.info(
+            f"Asistencia eliminada correctamente: reunion_id={reunion_id}, persona_id={persona_id}"
+        )
+
         return EstadoResponse(estado="Exitoso", message="Asistencia eliminada exitosamente")
 
     def user_assing_assistance(self, reunion_id: int, data: UserAssingAsistencia) -> EstadoResponse:
