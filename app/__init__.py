@@ -10,6 +10,7 @@ from app.utils.exceptions_handlers.exceptions_handlers import (
 )
 from app.utils.exceptions_handlers.models.error_response import AppException
 from app.routers.reunion_router import reunion_router
+from app.routers.asistencia_router import asistencia_router
 
 
 def create_app() -> FastAPI:
@@ -32,6 +33,8 @@ def create_app() -> FastAPI:
 
     # Registrar router
     app.include_router(router=reunion_router, prefix="/ms-gestion-reuniones")
+    app.include_router(router=asistencia_router,
+                       prefix="/ms-gestion-reuniones")
     # Logging
     logging.basicConfig(
         level=logging.INFO,

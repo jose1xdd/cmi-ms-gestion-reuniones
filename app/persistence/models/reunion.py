@@ -11,7 +11,7 @@ class Reunion(Base):
     fecha = Column(Date, nullable=True)
     horaInicio = Column(Time, nullable=True)
     horaFinal = Column(Time, nullable=True)
-
+    codigoAsistencia = Column(String(6), nullable=False)
     # Relación con asistencias
     asistencias = relationship(
         "Asistencia", back_populates="reunion", cascade="all, delete-orphan")

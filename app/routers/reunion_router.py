@@ -7,7 +7,6 @@ from app.models.inputs.reunion.reunion_update import ReunionUpdate
 from app.models.outputs.paginated_response import PaginatedReunion
 from app.models.outputs.response_estado import EstadoResponse
 from app.models.outputs.reunion.reunion_out import ReunionOut
-from app.persistence.models.reunion import Reunion
 from app.services.reunion_manager import ReunionManager
 
 
@@ -77,4 +76,17 @@ def eliminar_reunion(
     manager: ReunionManager = Depends(get_reunion_manager)
 ):
     response = manager.delete(reunion_id)
+    return JSONResponse(content=response.model_dump(exclude_none=True), status_code=200)
+
+@reunion_router.patch(
+    "/{reunion_id}/generate-asistencia-code",
+    response_model=EstadoResponse,
+    status_code=status.HTTP_200_OK
+)
+def generar_codigo_asistencia(
+    reunion_id: int,
+    manager: ReunionManager = Depends(get_reunion_manager)
+):
+    response = manager.generate_asistencia_code(reunion_id)
+
     return JSONResponse(content=response.model_dump(exclude_none=True), status_code=200)

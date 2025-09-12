@@ -3,6 +3,8 @@ from sqlalchemy.orm import Session
 
 from app.persistence.repository.asistencia_repository.impl.asistencia_repository import AsistenciaRepository
 from app.persistence.repository.asistencia_repository.interface.interface_asistencia_repository import IAsistenciaRepository
+from app.persistence.repository.persona_repository.impl.persona_repository import PersonaRepository
+from app.persistence.repository.persona_repository.interface.interface_persona_repository import IPersonaRepository
 from app.persistence.repository.reunion_repository.impl.reunion_repository import ReunionRepository
 from app.persistence.repository.reunion_repository.interface.interface_reunion_repository import IReunionRepository
 
@@ -17,7 +19,8 @@ class RepositoryFactory:
 
     _registry: dict[Type, Type] = {
         IReunionRepository: ReunionRepository,
-        IAsistenciaRepository: AsistenciaRepository
+        IAsistenciaRepository: AsistenciaRepository,
+        IPersonaRepository:PersonaRepository
     }
 
     def get_repository(self, interface: Type[T]) -> T:
