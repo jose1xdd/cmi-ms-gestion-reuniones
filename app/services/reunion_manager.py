@@ -45,7 +45,7 @@ class ReunionManager:
         # Crear reunión si no hay conflictos
         reunion = self.reunion_repository.create(data)
         self.logger.info(f"Reunión creada exitosamente con ID={reunion.id}")
-        return EstadoResponse(estado="Exitoso", message="Reunión creada exitosamente")
+        return EstadoResponse(estado="Exitoso", message="Reunión creada exitosamente", data=reunion.to_dict())
 
     def get(self, reunion_id: int) -> Reunion:
         self.logger.info(f"Consultando reunión con ID={reunion_id}")
@@ -130,5 +130,6 @@ class ReunionManager:
 
         return EstadoResponse(
             estado="Exitoso",
-            message="Código de reunión actualizado exitosamente"
+            message="Código de reunión actualizado exitosamente",
+            data={"codigo": codigo}
         )
