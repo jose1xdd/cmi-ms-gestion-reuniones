@@ -2,6 +2,7 @@ from logging import Logger
 
 from app.models.inputs.asistencia.asistencia_assing import AssingAsistencia
 from app.models.inputs.asistencia.user_asistencia_assing import UserAssingAsistencia
+from app.models.outputs.paginated_response import PaginatedAsistenciaPersonas
 from app.models.outputs.response_estado import EstadoResponse
 from app.persistence.models.asistencia import Asistencia
 from app.persistence.repository.asistencia_repository.interface.interface_asistencia_repository import IAsistenciaRepository
@@ -112,3 +113,22 @@ class AsistenciaManager:
         )
 
         return EstadoResponse(estado="Exitoso", message="Asistencia creada exitosamente")
+
+    def get_personas_with_asistencia(
+        self, page: int, page_size: int, reunion_id: int
+    ) -> PaginatedAsistenciaPersonas:
+        self.logger.info(
+            f"Consultando personas con asistencia: reunion_id={reunion_id}, page={page}, page_size={page_size}"
+        )
+
+        # Validar reunión
+        reunion = self.reunion_repository.get(reunion_id)
+        if reunion is None:
+            self.logger.warning(f"Reunión con ID={reunion_id} no existe")
+            raise AppException("Reunión no existe")
+
+        result = self.asistencia_repository.get_personas_with_asistencia(
+            page=page, page_size=page_size, reunion_id=reunion_id
+        )
+
+        return result
