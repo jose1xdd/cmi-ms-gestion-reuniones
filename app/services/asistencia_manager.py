@@ -3,6 +3,7 @@ from logging import Logger
 from app.models.inputs.asistencia.asistencia_assing import AssingAsistencia
 from app.models.inputs.asistencia.user_asistencia_assing import UserAssingAsistencia
 from app.models.outputs.asistencia.asistencia_assing_out import AsignacionAsistenciaResponse
+from app.models.outputs.asistencia.asistencia_persona import AsistenciaIndividual
 from app.models.outputs.paginated_response import PaginatedAsistenciaPersonas
 from app.models.outputs.response_estado import EstadoResponse
 from app.persistence.models.asistencia import Asistencia
@@ -158,3 +159,11 @@ class AsistenciaManager:
         )
 
         return result
+
+    def get_asistencia_persona(self, persona_id: int, reunion_id: int) -> AsistenciaIndividual:
+        asistencia = self.asistencia_repository.get_by_reunion_and_persona(
+            reunion_id, persona_id)
+        result = False
+        if asistencia is not None:
+            result = True
+        return AsistenciaIndividual(asistencia_persona=result)

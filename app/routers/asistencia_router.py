@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 from app.ioc.container import get_asistencia_manager
 from app.models.inputs.asistencia.asistencia_assing import AssingAsistencia
 from app.models.inputs.asistencia.user_asistencia_assing import UserAssingAsistencia
+from app.models.outputs.asistencia.asistencia_persona import AsistenciaIndividual
 from app.models.outputs.paginated_response import PaginatedAsistenciaPersonas
 from app.models.outputs.response_estado import EstadoResponse
 from app.services.asistencia_manager import AsistenciaManager
@@ -67,3 +68,16 @@ def get_personas_with_asistencia(
     asistencia_manager: AsistenciaManager = Depends(get_asistencia_manager)
 ):
     return asistencia_manager.get_personas_with_asistencia(page, page_size, reunion_id)
+
+
+@asistencia_router.get(
+    "/{reunion_id}/persona/{persona_id}",
+    response_model=AsistenciaIndividual,
+    status_code=status.HTTP_200_OK
+)
+def get_personas_with_asistencia(
+    reunion_id: int,
+    persona_id: int,
+    asistencia_manager: AsistenciaManager = Depends(get_asistencia_manager)
+):
+    return asistencia_manager.get_asistencia_persona(persona_id, reunion_id)
