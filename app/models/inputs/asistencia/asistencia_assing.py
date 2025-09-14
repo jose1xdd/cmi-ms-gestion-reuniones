@@ -1,5 +1,6 @@
+from typing import List
 from pydantic import BaseModel
 
 
 class AssingAsistencia(BaseModel):
-    persona_id: str
+    persona_id: List[str]

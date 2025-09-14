@@ -2,6 +2,7 @@ from logging import Logger
 
 from app.models.inputs.asistencia.asistencia_assing import AssingAsistencia
 from app.models.inputs.asistencia.user_asistencia_assing import UserAssingAsistencia
+from app.models.outputs.asistencia.asistencia_assing_out import AsignacionAsistenciaResponse
 from app.models.outputs.paginated_response import PaginatedAsistenciaPersonas
 from app.models.outputs.response_estado import EstadoResponse
 from app.persistence.models.asistencia import Asistencia
@@ -21,9 +22,10 @@ class AsistenciaManager:
         self.reunion_repository = reunion_repository
         self.persona_repository = persona_repository
 
-    def assign_assistance(self, reunion_id: int, data: AssingAsistencia) -> EstadoResponse:
+    def assign_assistance(self, reunion_id: int, data: AssingAsistencia) -> AsignacionAsistenciaResponse:
         self.logger.info(
-            f"Intentando asignar asistencia: reunion_id={reunion_id}, persona_id={data.persona_id}")
+            f"Intentando asignar asistencia: reunion_id={reunion_id}, personas={data.persona_id}"
+        )
 
         # Validar que la reunión exista
         reunion = self.reunion_repository.get(reunion_id)
@@ -31,26 +33,50 @@ class AsistenciaManager:
             self.logger.warning(f"Reunión con ID={reunion_id} no existe")
             raise AppException("Reunión no existe")
 
-        asistencia = self.asistencia_repository.get_by_reunion_and_persona(
-            reunion_id, data.persona_id)
-        if asistencia is not None:
-            raise AppException("ya registraste la asistencia")
+        personas_asignadas = []
+        personas_no_asignadas = []
 
-        # Validar que la persona exista
-        persona = self.persona_repository.get(data.persona_id)
-        if persona is None:
-            self.logger.warning(f"Persona con ID={data.persona_id} no existe")
-            raise AppException("Persona a asignar asistencia no existe")
+        for persona_id in data.persona_id:
+            self.logger.debug(f"Procesando persona_id={persona_id}")
 
-        # Crear asistencia
-        self.asistencia_repository.create(Asistencia(
-            asistenteId=data.persona_id,
-            reunionId=reunion_id
-        ))
-        self.logger.info(
-            f"Asistencia creada correctamente: reunion_id={reunion_id}, persona_id={data.persona_id}")
+            asistencia = self.asistencia_repository.get_by_reunion_and_persona(
+                reunion_id, persona_id
+            )
+            if asistencia is not None:
+                self.logger.warning(
+                    f"La persona {persona_id} ya tiene asistencia registrada en reunion_id={reunion_id}"
+                )
+                personas_no_asignadas.append(
+                    {"persona_id": persona_id,
+                        "motivo": "Ya tiene asistencia registrada"}
+                )
+                continue
 
-        return EstadoResponse(estado="Exitoso", message="Asistencia creada exitosamente")
+            # Validar que la persona exista
+            persona = self.persona_repository.get(persona_id)
+            if persona is None:
+                self.logger.warning(f"Persona con ID={persona_id} no existe")
+                personas_no_asignadas.append(
+                    {"persona_id": persona_id, "motivo": "Persona no existe"}
+                )
+                continue
+
+            # Crear asistencia
+            self.asistencia_repository.create(
+                Asistencia(asistenteId=persona_id, reunionId=reunion_id)
+            )
+            self.logger.info(
+                f"Asistencia creada correctamente: reunion_id={reunion_id}, persona_id={persona_id}"
+            )
+            personas_asignadas.append(persona_id)
+
+        return AsignacionAsistenciaResponse(
+            reunion_id=reunion_id,
+            personas_asignadas=personas_asignadas,
+            personas_no_asignadas=personas_no_asignadas,
+            total_asignadas=len(personas_asignadas),
+            total_no_asignadas=len(personas_no_asignadas),
+        )
 
     def delete_assistance(self, reunion_id: int, persona_id: int) -> EstadoResponse:
         self.logger.info(
