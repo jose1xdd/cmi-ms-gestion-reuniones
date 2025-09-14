@@ -133,3 +133,24 @@ class ReunionManager:
             message="Código de reunión actualizado exitosamente",
             data={"codigo": codigo}
         )
+
+    def delete_asistencia_code(self, reunion_id: int) -> EstadoResponse:
+        self.logger.info(
+            f"eliminando código de asistencia para reunión ID={reunion_id}")
+
+        reunion = self.reunion_repository.get(reunion_id)
+        if not reunion:
+            self.logger.warning(
+                f"No se encontró la reunión con ID={reunion_id}")
+            raise AppException(
+                f"No se encontró reunión con el ID={reunion_id}")
+        reunion.codigoAsistencia = None
+        self.update(reunion_id, reunion)
+
+        self.logger.info(
+            f"Código de asistencia eliminado exitosamente para reunión ID={reunion_id}"
+        )
+        return EstadoResponse(
+            estado="Exitoso",
+            message="Código de reunión actualizado exitosamente"
+        )
