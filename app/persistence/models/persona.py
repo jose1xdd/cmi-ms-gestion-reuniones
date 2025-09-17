@@ -25,3 +25,4 @@ class Persona(Base):
     idParcialidad = Column(Integer, ForeignKey('Parcialidad.id'))
 
     asistencias = relationship("Asistencia", back_populates="persona", cascade="all, delete-orphan")
+    usuario = relationship("Usuario", back_populates="persona", uselist=False)

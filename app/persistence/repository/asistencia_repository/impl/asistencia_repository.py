@@ -4,6 +4,7 @@ from sqlalchemy import case
 from app.models.outputs.paginated_response import PaginatedAsistenciaPersonas
 from app.persistence.models.asistencia import Asistencia
 from app.persistence.models.persona import Persona
+from app.persistence.models.usuario import Usuario
 from app.persistence.repository.asistencia_repository.interface.interface_asistencia_repository import IAsistenciaRepository
 from app.persistence.repository.base_repository.impl.base_repository import BaseRepository
 
@@ -21,21 +22,24 @@ class AsistenciaRepository(BaseRepository, IAsistenciaRepository):
         )
 
     def get_personas_with_asistencia(self, page: int, page_size: int, reunion_id: int) -> PaginatedAsistenciaPersonas:
-        """Obtiene todas las personas y cruza si están en asistencia de la reunión"""
+        """Obtiene todas las personas que tienen usuario y cruza si están en asistencia de la reunión"""
         query = (
             self.db.query(
-                Persona.id.label("Numero_documento"),  # 👈 alias
+                Persona.id.label("Numero_documento"),
                 Persona.nombre.label("Nombre"),
                 Persona.apellido.label("Apellido"),
                 case(
-                    (Asistencia.id.isnot(None), True),  # ✅ corregido
+                    (Asistencia.id.isnot(None), True),
                     else_=False
                 ).label("Asistencia")
             )
+            # 👈 Solo personas con usuario
+            .join(Usuario, Usuario.personaId == Persona.id)
             .outerjoin(
                 Asistencia,
                 (Asistencia.asistenteId == Persona.id) &
                 (Asistencia.reunionId == reunion_id)
-            ).filter(Persona.activo.is_(True))
+            )
+            .filter(Persona.activo.is_(True))
         )
         return self.paginate(page, page_size, query)
