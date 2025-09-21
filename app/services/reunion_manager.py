@@ -64,15 +64,26 @@ class ReunionManager:
         self.logger.info(f"Intentando actualizar reunión ID={reunion_id} "
                          f"con datos: {data}")
 
-        # Validar hora
-        self._validar_hora_actual(data.fecha, data.horaInicio, "actualizar")
-
         # Validar existencia
         reunion = self.reunion_repository.get(reunion_id)
         if not reunion:
             self.logger.warning(
                 f"No se encontró reunión con ID={reunion_id} para actualizar")
             raise AppException(f"No existe reunión con ID={reunion_id}")
+
+        # Validar si la reunión ya inició
+        ahora = datetime.now()
+        if reunion.fecha < ahora.date() or (
+            reunion.fecha == ahora.date() and reunion.horaInicio <= ahora.time()
+        ):
+            self.logger.warning(
+                f"No se puede modificar la reunión ID={reunion_id} porque ya inició")
+            raise AppException(
+                f"La reunión con ID={reunion_id} ya inició y no se puede modificar"
+            )
+
+        # Validar hora nueva
+        self._validar_hora_actual(data.fecha, data.horaInicio, "actualizar")
 
         # Validar conflictos
         conflicto = self.reunion_repository.existe_conflicto_reunion(
