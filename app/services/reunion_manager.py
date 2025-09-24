@@ -156,7 +156,7 @@ class ReunionManager:
             raise AppException(
                 f"No se encontró reunión con el ID={reunion_id}")
         reunion.codigoAsistencia = None
-        self.update(reunion_id, reunion)
+        self.reunion_repository.update(reunion_id, reunion)
 
         self.logger.info(
             f"Código de asistencia eliminado exitosamente para reunión ID={reunion_id}"
