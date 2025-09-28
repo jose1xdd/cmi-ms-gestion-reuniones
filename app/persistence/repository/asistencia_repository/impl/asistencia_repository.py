@@ -21,8 +21,21 @@ class AsistenciaRepository(BaseRepository, IAsistenciaRepository):
             .first()
         )
 
-    def get_personas_with_asistencia(self, page: int, page_size: int, reunion_id: int) -> PaginatedAsistenciaPersonas:
-        """Obtiene todas las personas que tienen usuario y cruza si están en asistencia de la reunión"""
+    from typing import Optional
+
+
+    def get_personas_with_asistencia(
+        self,
+        page: int,
+        page_size: int,
+        reunion_id: int,
+        numero_documento: Optional[str] = None,
+        nombre: Optional[str] = None,
+        apellido: Optional[str] = None
+    ) -> PaginatedAsistenciaPersonas:
+        """Obtiene todas las personas que tienen usuario y cruza si están en asistencia de la reunión,
+        con filtros opcionales por documento, nombre y apellido.
+        """
         query = (
             self.db.query(
                 Persona.id.label("Numero_documento"),
@@ -33,8 +46,6 @@ class AsistenciaRepository(BaseRepository, IAsistenciaRepository):
                     else_=False
                 ).label("Asistencia")
             )
-            # 👈 Solo personas con usuario
-            .join(Usuario, Usuario.personaId == Persona.id)
             .outerjoin(
                 Asistencia,
                 (Asistencia.asistenteId == Persona.id) &
@@ -42,4 +53,15 @@ class AsistenciaRepository(BaseRepository, IAsistenciaRepository):
             )
             .filter(Persona.activo.is_(True))
         )
+
+        # Aplicar filtros dinámicos
+        if numero_documento:
+            query = query.filter(Persona.id == numero_documento)
+
+        if nombre:
+            query = query.filter(Persona.nombre.ilike(f"%{nombre}%"))
+
+        if apellido:
+            query = query.filter(Persona.apellido.ilike(f"%{apellido}%"))
+
         return self.paginate(page, page_size, query)

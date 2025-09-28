@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import APIRouter, Depends, Query, status
 from fastapi.responses import JSONResponse
 
@@ -65,9 +66,20 @@ def get_personas_with_asistencia(
     page: int = Query(1, ge=1, description="Número de página"),
     page_size: int = Query(
         10, ge=1, le=100, description="Cantidad de registros por página"),
+    numero_documento: Optional[str] = Query(
+        None, description="Número de documento para filtrar"),
+    nombre: Optional[str] = Query(
+        None, description="Nombre de la persona para filtrar"),
+    apellido: Optional[str] = Query(
+        None, description="Apellido de la persona para filtrar"),
     asistencia_manager: AsistenciaManager = Depends(get_asistencia_manager)
 ):
-    return asistencia_manager.get_personas_with_asistencia(page, page_size, reunion_id)
+    return asistencia_manager.get_personas_with_asistencia(page=page,
+                                                           page_size=page_size,
+                                                           reunion_id=reunion_id,
+                                                           numero_documento=numero_documento,
+                                                           nombre=nombre,
+                                                           apellido=apellido)
 
 
 @asistencia_router.get(

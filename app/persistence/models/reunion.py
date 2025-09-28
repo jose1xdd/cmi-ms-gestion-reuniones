@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, Time
+from sqlalchemy import Boolean, Column, Integer, String, Date, Time
 from sqlalchemy.orm import relationship
 from app.config.database import Base
 
@@ -12,6 +12,9 @@ class Reunion(Base):
     horaInicio = Column(Time, nullable=True)
     horaFinal = Column(Time, nullable=True)
     codigoAsistencia = Column(String(6), nullable=False)
+    ubicacion = Column(String(50), nullable=True)
+    editable = Column(Boolean, default=True, nullable=False)
+
     # Relación con asistencias
     asistencias = relationship(
         "Asistencia", back_populates="reunion", cascade="all, delete-orphan")
@@ -24,4 +27,6 @@ class Reunion(Base):
             "horaInicio": self.horaInicio.isoformat() if self.horaInicio else None,
             "horaFinal": self.horaFinal.isoformat() if self.horaFinal else None,
             "codigoAsistencia": self.codigoAsistencia,
+            "ubicacion": self.ubicacion,
+            "editable": self.editable
         }
