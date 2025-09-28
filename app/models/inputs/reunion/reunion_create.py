@@ -7,5 +7,7 @@ class ReunionCreate(BaseModel):
     fecha: date
     horaInicio: time
     horaFinal: time
+    ubicacion: str
+
     class Config:
         from_attributes = True  # Para convertir entre SQLAlchemy y Pydantic fácilmente

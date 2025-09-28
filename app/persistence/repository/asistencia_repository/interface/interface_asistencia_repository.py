@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Dict, List, Optional
 
+from app.models.outputs.paginated_response import PaginatedAsistenciaPersonas
 from app.persistence.models.asistencia import Asistencia
 from app.persistence.repository.base_repository.interface.ibase_repository import IBaseRepository
 
@@ -11,5 +12,13 @@ class IAsistenciaRepository(IBaseRepository[Asistencia, int], ABC):
         pass
 
     @abstractmethod
-    def get_personas_with_asistencia(self, page: int, page_size: int, reunion_id: int) -> List[Dict]:
+    def get_personas_with_asistencia(
+        self,
+        page: int,
+        page_size: int,
+        reunion_id: int,
+        numero_documento: Optional[str] = None,
+        nombre: Optional[str] = None,
+        apellido: Optional[str] = None
+    ) -> PaginatedAsistenciaPersonas:
         pass

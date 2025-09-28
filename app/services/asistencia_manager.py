@@ -1,4 +1,5 @@
 from logging import Logger
+from typing import Optional
 
 from app.models.inputs.asistencia.asistencia_assing import AssingAsistencia
 from app.models.inputs.asistencia.user_asistencia_assing import UserAssingAsistencia
@@ -32,6 +33,9 @@ class AsistenciaManager:
         if reunion is None:
             self.logger.warning(f"Reunión con ID={reunion_id} no existe")
             raise AppException("Reunión no existe")
+
+        if reunion.editable == False:
+            raise AppException("Reunión no es editable")
 
         asistencia = self.asistencia_repository.get_by_reunion_and_persona(
             reunion_id, data.persona_id)
@@ -117,7 +121,12 @@ class AsistenciaManager:
         return EstadoResponse(estado="Exitoso", message="Asistencia creada exitosamente")
 
     def get_personas_with_asistencia(
-        self, page: int, page_size: int, reunion_id: int
+        self, page: int,
+        page_size: int,
+        reunion_id: int,
+        numero_documento: Optional[str] = None,
+        nombre: Optional[str] = None,
+        apellido: Optional[str] = None
     ) -> PaginatedAsistenciaPersonas:
         self.logger.info(
             f"Consultando personas con asistencia: reunion_id={reunion_id}, page={page}, page_size={page_size}"
@@ -130,7 +139,12 @@ class AsistenciaManager:
             raise AppException("Reunión no existe")
 
         result = self.asistencia_repository.get_personas_with_asistencia(
-            page=page, page_size=page_size, reunion_id=reunion_id
+            page=page,
+            page_size=page_size,
+            reunion_id=reunion_id,
+            numero_documento=numero_documento,
+            nombre=nombre,
+            apellido=apellido
         )
 
         return result
