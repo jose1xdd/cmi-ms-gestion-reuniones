@@ -9,6 +9,7 @@ class ReunionOut(BaseModel):
     fecha: Optional[date] = None
     horaInicio: Optional[time] = None
     horaFinal: Optional[time] = None
-
+    ubicacion: Optional[str] = None
+    editable: Optional[bool] = None
     class Config:
         from_attributes = True
