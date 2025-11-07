@@ -22,7 +22,7 @@ jobs:
 
             # Reemplaza una cadena tipo "DATABASE_URL" con el valor real del secreto
             sed -i "s|_DATABASE_URL_|${{ secrets.DATABASE_URL }}|g" deploy-details.json
-
+            sed -i "s|_SMTP_PASSWORD_|${{ secrets.SMTP_PASSWORD }}|g" deploy-details.json
             echo "Archivo actualizado:"
             cat deploy-details.json
           else

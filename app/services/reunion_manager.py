@@ -4,6 +4,7 @@ from app.models.inputs.reunion.reunion_create import ReunionCreate
 from app.models.inputs.reunion.reunion_filters import ReunionFilter
 from app.models.inputs.reunion.reunion_update import ReunionUpdate
 from app.models.outputs.response_estado import EstadoResponse
+from app.persistence.models.enum import EstadoReunion
 from app.persistence.models.reunion import Reunion
 from app.persistence.repository.reunion_repository.interface.interface_reunion_repository import IReunionRepository
 from app.utils.exceptions_handlers.models.error_response import AppException
@@ -56,7 +57,7 @@ class ReunionManager:
                 f"No se encontró la reunión con ID={reunion_id}")
         return reunion
 
-    def get_all(self, page: int, page_size: int, filters: ReunionFilter) -> list[Reunion]:
+    def get_all(self, page: int, page_size: int, filters: ReunionFilter):
         self.logger.info("Consultando todas las reuniones")
         return self.reunion_repository.find_all_reunion(page, page_size, filters)
 
@@ -70,8 +71,6 @@ class ReunionManager:
             self.logger.warning(
                 f"No se encontró reunión con ID={reunion_id} para actualizar")
             raise AppException(f"No existe reunión con ID={reunion_id}")
-        if reunion.editable == False:
-            raise AppException("La reunion ya fue cerrada, no se puede modificar")
         # Validar hora nueva
         self._validar_hora_actual(data.fecha, data.horaInicio, "actualizar")
         conflicto = None
@@ -110,49 +109,58 @@ class ReunionManager:
         self.reunion_repository.delete(reunion_id)
         self.logger.info(f"Reunión ID={reunion_id} eliminada correctamente")
         return EstadoResponse(estado="Exitoso", message="Reunión eliminada exitosamente")
-
-    def generate_asistencia_code(self, reunion_id: int) -> EstadoResponse:
-        self.logger.info(
-            f"Generando código de asistencia para reunión ID={reunion_id}")
-
-        reunion = self.reunion_repository.get(reunion_id)
-        if not reunion:
-            self.logger.warning(
-                f"No se encontró la reunión con ID={reunion_id}")
-            raise AppException(
-                f"No se encontró reunión con el ID={reunion_id}")
-
-        codigo = generate_code()
-        reunion.codigoAsistencia = codigo
-        self.reunion_repository.update(reunion_id, reunion)
-
-        self.logger.info(
-            f"Código de asistencia generado exitosamente para reunión ID={reunion_id}: {codigo}"
-        )
-
-        return EstadoResponse(
-            estado="Exitoso",
-            message="Código de reunión actualizado exitosamente",
-            data={"codigo": codigo}
-        )
-
-    def delete_asistencia_code(self, reunion_id: int) -> EstadoResponse:
-        self.logger.info(
-            f"eliminando código de asistencia para reunión ID={reunion_id}")
+    
+    def abrir_reunion(self, reunion_id: int) -> EstadoResponse:
+        """
+        Cambia el estado de la reunión de PROGRAMADA a EN_CURSO.
+        """
+        self.logger.info(f"[ReunionManager] Intentando abrir reunión ID={reunion_id}")
 
         reunion = self.reunion_repository.get(reunion_id)
         if not reunion:
+            raise AppException("La reunión no existe")
+
+        if reunion.estado != EstadoReunion.PROGRAMADA.value:
             self.logger.warning(
-                f"No se encontró la reunión con ID={reunion_id}")
-            raise AppException(
-                f"No se encontró reunión con el ID={reunion_id}")
-        reunion.codigoAsistencia = None
-        self.reunion_repository.update(reunion_id, reunion)
+                f"[ReunionManager] No se puede abrir la reunión ID={reunion_id} porque está en estado {reunion.estado}"
+            )
+            raise AppException("Solo se pueden abrir reuniones en estado PROGRAMADA")
+
+        reunion_actualizada = self.reunion_repository.update_estado(
+            reunion_id, EstadoReunion.EN_CURSO.value
+        )
 
         self.logger.info(
-            f"Código de asistencia eliminado exitosamente para reunión ID={reunion_id}"
+            f"[ReunionManager] ✅ Reunión ID={reunion_id} cambiada a estado EN_CURSO"
         )
         return EstadoResponse(
             estado="Exitoso",
-            message="Código de reunión actualizado exitosamente"
+            message=f"La reunión '{reunion_actualizada.titulo}' ha sido abierta correctamente",
+        )
+    def cerrar_reunion(self, reunion_id: int) -> EstadoResponse:
+        """
+        Cambia el estado de la reunión de EN_CURSO a CERRADA.
+        """
+        self.logger.info(f"[ReunionManager] Intentando cerrar reunión ID={reunion_id}")
+
+        reunion = self.reunion_repository.get(reunion_id)
+        if not reunion:
+            raise AppException("La reunión no existe")
+
+        if reunion.estado != EstadoReunion.EN_CURSO.value:
+            self.logger.warning(
+                f"[ReunionManager] No se puede cerrar la reunión ID={reunion_id} porque está en estado {reunion.estado}"
+            )
+            raise AppException("Solo se pueden cerrar reuniones en estado EN_CURSO")
+
+        reunion_actualizada = self.reunion_repository.update_estado(
+            reunion_id, EstadoReunion.CERRADA.value
+        )
+
+        self.logger.info(
+            f"[ReunionManager] ✅ Reunión ID={reunion_id} cambiada a estado CERRADA"
+        )
+        return EstadoResponse(
+            estado="Exitoso",
+            message=f"La reunión '{reunion_actualizada.titulo}' ha sido cerrada correctamente",
         )

@@ -1,8 +1,13 @@
 from datetime import date, time
+from enum import Enum
 from typing import Optional
 from pydantic import BaseModel
 
-
+class EnumEstadoActividad(str, Enum):
+    PROGRAMADA = "PROGRAMADA"
+    EN_CURSO = "EN_CURSO"
+    COMPLETADA = "COMPLETADA"
+    
 class ReunionOut(BaseModel):
     id: int
     titulo: Optional[str] = None
@@ -10,6 +15,6 @@ class ReunionOut(BaseModel):
     horaInicio: Optional[time] = None
     horaFinal: Optional[time] = None
     ubicacion: Optional[str] = None
-    editable: Optional[bool] = None
+    estado: Optional[EnumEstadoActividad] = None
     class Config:
         from_attributes = True

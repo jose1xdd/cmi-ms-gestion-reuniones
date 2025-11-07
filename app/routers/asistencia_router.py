@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 
 from app.ioc.container import get_asistencia_manager
 from app.models.inputs.asistencia.asistencia_assing import AssingAsistencia
-from app.models.inputs.asistencia.user_asistencia_assing import UserAssingAsistencia
+from app.models.inputs.asistencia.user_asistencia_assing import UserRegisterAsistencia
 from app.models.outputs.asistencia.asistencia_persona import AsistenciaIndividual
 from app.models.outputs.paginated_response import PaginatedAsistenciaPersonas
 from app.models.outputs.response_estado import EstadoResponse
@@ -49,10 +49,10 @@ def delete_asistencia(
 )
 def user_assign_asistencia(
     reunion_id: int,
-    data: UserAssingAsistencia,
+    data: UserRegisterAsistencia,
     asistencia_manager: AsistenciaManager = Depends(get_asistencia_manager)
 ):
-    response = asistencia_manager.user_assing_assistance(reunion_id, data)
+    response = asistencia_manager.user_register_assistance(reunion_id, data)
     return JSONResponse(content=response.model_dump(exclude_none=True), status_code=201)
 
 

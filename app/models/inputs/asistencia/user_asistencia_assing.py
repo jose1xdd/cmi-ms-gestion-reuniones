@@ -1,6 +1,7 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 
-class UserAssingAsistencia(BaseModel):
-    codigo_asistencia: str
-    persona_id: str
+class UserRegisterAsistencia(BaseModel):
+    numero_documento: str
+    nombre_completo: str
+    correo_electronico: EmailStr
