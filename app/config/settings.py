@@ -13,3 +13,8 @@ class Settings(BaseSettings):
 
     port: int
     database_url: str = Field(..., alias="DATABASE_URL")
+    
+    smtp_server: str
+    smtp_port: int
+    smtp_password: str
+    smtp_email: str

@@ -78,28 +78,27 @@ def eliminar_reunion(
     response = manager.delete(reunion_id)
     return JSONResponse(content=response.model_dump(exclude_none=True), status_code=200)
 
+@reunion_router.patch(
+    "/{reunion_id}/abrir",
+    status_code=status.HTTP_200_OK,
+    response_model=EstadoResponse,
+    summary="Abre una reunión (PROGRAMADA → EN_CURSO)"
+)
+def abrir_reunion(
+    reunion_id: int,
+    manager: ReunionManager = Depends(get_reunion_manager),
+):
+    return manager.abrir_reunion(reunion_id)
+
 
 @reunion_router.patch(
-    "/{reunion_id}/generate-asistencia-code",
+    "/{reunion_id}/cerrar",
+    status_code=status.HTTP_200_OK,
     response_model=EstadoResponse,
-    status_code=status.HTTP_200_OK
+    summary="Cierra una reunión (EN_CURSO → CERRADA)"
 )
-def generar_codigo_asistencia(
+def cerrar_reunion(
     reunion_id: int,
-    manager: ReunionManager = Depends(get_reunion_manager)
+    manager: ReunionManager = Depends(get_reunion_manager),
 ):
-    response = manager.generate_asistencia_code(reunion_id)
-    return JSONResponse(content=response.model_dump(exclude_none=True), status_code=200)
-
-
-@reunion_router.patch(
-    "/{reunion_id}/delete-asistencia-code",
-    response_model=EstadoResponse,
-    status_code=status.HTTP_200_OK
-)
-def eliminar_codigo_asistencia(
-    reunion_id: int,
-    manager: ReunionManager = Depends(get_reunion_manager)
-):
-    response = manager.delete_asistencia_code(reunion_id)
-    return JSONResponse(content=response.model_dump(exclude_none=True), status_code=200)
+    return manager.cerrar_reunion(reunion_id)

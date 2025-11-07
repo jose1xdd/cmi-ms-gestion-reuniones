@@ -2,6 +2,10 @@
     "port": "8084",
     "environments": {
         "DATABASE_URL": "_DATABASE_URL_",
-        "PORT": "8084"
+        "PORT": "8084",
+        "SMTP_SERVER": "smtp.gmail.com",
+        "SMTP_PORT": "587",
+        "SMTP_EMAIL": "comunidadquillancingaconsaca@gmail.com",
+        "SMTP_PASSWORD": "_SMTP_PASSWORD_"
     }
 }
