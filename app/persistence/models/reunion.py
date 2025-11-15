@@ -32,7 +32,6 @@ class Reunion(Base):
             "fecha": self.fecha.isoformat() if self.fecha else None,
             "horaInicio": self.horaInicio.isoformat() if self.horaInicio else None,
             "horaFinal": self.horaFinal.isoformat() if self.horaFinal else None,
-            "codigoAsistencia": self.codigoAsistencia,
             "ubicacion": self.ubicacion,
             "estado": self.estado.value if self.estado else None,
         }

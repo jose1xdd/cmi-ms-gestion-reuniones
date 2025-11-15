@@ -58,7 +58,6 @@ class ReunionRepository(BaseRepository, IReunionRepository):
                 Reunion.fecha,
                 Reunion.horaInicio,
                 Reunion.horaFinal,
-                Reunion.codigoAsistencia,
                 Reunion.ubicacion,
                 estado_case
             )
@@ -76,7 +75,6 @@ class ReunionRepository(BaseRepository, IReunionRepository):
                 "fecha": row.fecha,
                 "horaInicio": row.horaInicio,
                 "horaFinal": row.horaFinal,
-                "codigoAsistencia": row.codigoAsistencia,
                 "ubicacion": row.ubicacion,
                 "estado": row.estado.value if hasattr(row.estado, "value") else row.estado,
             }
