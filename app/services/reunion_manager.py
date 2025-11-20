@@ -4,8 +4,8 @@ from app.models.inputs.reunion.reunion_create import ReunionCreate
 from app.models.inputs.reunion.reunion_filters import ReunionFilter
 from app.models.inputs.reunion.reunion_update import ReunionUpdate
 from app.models.outputs.response_estado import EstadoResponse
-from app.persistence.models.enum import EstadoReunion
-from app.persistence.models.reunion import Reunion
+from app.models.outputs.reunion.reunion_out import ReunionesPorEstado
+from app.persistence.models.reunion import EstadoReunion, Reunion
 from app.persistence.repository.reunion_repository.interface.interface_reunion_repository import IReunionRepository
 from app.utils.exceptions_handlers.models.error_response import AppException
 from app.utils.util_functions import generate_code
@@ -60,6 +60,17 @@ class ReunionManager:
     def get_all(self, page: int, page_size: int, filters: ReunionFilter):
         self.logger.info("Consultando todas las reuniones")
         return self.reunion_repository.find_all_reunion(page, page_size, filters)
+
+    def contar_reuniones_por_estado(self):
+        self.logger.info("[ReunionManager] Contando reuniones por estado")
+        data = self.reunion_repository.contar_por_estado()
+
+        return ReunionesPorEstado(
+            programadas=data.get("PROGRAMADA", 0),
+            en_curso=data.get("EN_CURSO", 0),
+            cerradas=data.get("CERRADA", 0)
+        )
+
 
     def update(self, reunion_id: int, data: ReunionUpdate) -> EstadoResponse:
         self.logger.info(f"Intentando actualizar reunión ID={reunion_id} "

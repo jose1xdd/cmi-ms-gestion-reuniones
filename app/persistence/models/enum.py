@@ -35,8 +35,3 @@ class EnumEscolaridad(Enum):
     SE = "SE"   # Secundaria
     UN = "UN"   # Universitaria
 
-
-class EstadoReunion(Enum):
-    PROGRAMADA = "PROGRAMADA"
-    EN_CURSO = "EN_CURSO"
-    CERRADA = "CERRADA"
