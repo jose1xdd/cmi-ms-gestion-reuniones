@@ -3,10 +3,8 @@ from sqlalchemy import func, case, and_
 from sqlalchemy import and_
 from datetime import datetime
 from sqlalchemy.orm import Session
-from app.models.outputs.paginated_response import PaginatedReunion
 from app.models.outputs.reunion.reunion_out import EnumEstadoActividad
-from app.persistence.models.enum import EstadoReunion
-from app.persistence.models.reunion import Reunion
+from app.persistence.models.reunion import EstadoReunion, Reunion
 from app.persistence.repository.base_repository.impl.base_repository import BaseRepository
 from app.persistence.repository.reunion_repository.interface.interface_reunion_repository import IReunionRepository
 from app.utils.exceptions_handlers.models.error_response import AppException
@@ -15,6 +13,29 @@ from app.utils.exceptions_handlers.models.error_response import AppException
 class ReunionRepository(BaseRepository, IReunionRepository):
     def __init__(self, db: Session):
         super().__init__(Reunion, db)
+
+    def contar_por_estado(self):
+        query = (
+            self.db.query(
+                func.sum(
+                    case((Reunion.estado == EstadoReunion.PROGRAMADA, 1), else_=0)
+                ).label("programadas"),
+                func.sum(
+                    case((Reunion.estado == EstadoReunion.EN_CURSO, 1), else_=0)
+                ).label("en_curso"),
+                func.sum(
+                    case((Reunion.estado == EstadoReunion.CERRADA, 1), else_=0)
+                ).label("cerradas"),
+            )
+        )
+
+        result = query.first()
+
+        return {
+            "PROGRAMADA": result.programadas or 0,
+            "EN_CURSO": result.en_curso or 0,
+            "CERRADA": result.cerradas or 0
+        }
 
     def existe_conflicto_reunion(self, fecha, hora_inicio, hora_final, reunion_id: int = None) -> bool:
         query = self.db.query(Reunion).filter(
@@ -37,14 +58,17 @@ class ReunionRepository(BaseRepository, IReunionRepository):
         estado_case = case(
             (
                 # COMPLETADA: la reunión terminó antes del momento actual
-                func.timestamp(func.concat(Reunion.fecha, ' ', Reunion.horaFinal)) < now,
+                func.timestamp(func.concat(
+                    Reunion.fecha, ' ', Reunion.horaFinal)) < now,
                 EnumEstadoActividad.COMPLETADA,
             ),
             (
                 # EN_CURSO: la fecha actual está entre horaInicio y horaFinal
                 and_(
-                    func.timestamp(func.concat(Reunion.fecha, ' ', Reunion.horaInicio)) <= now,
-                    func.timestamp(func.concat(Reunion.fecha, ' ', Reunion.horaFinal)) >= now,
+                    func.timestamp(func.concat(
+                        Reunion.fecha, ' ', Reunion.horaInicio)) <= now,
+                    func.timestamp(func.concat(
+                        Reunion.fecha, ' ', Reunion.horaFinal)) >= now,
                 ),
                 EnumEstadoActividad.EN_CURSO,
             ),
@@ -82,9 +106,10 @@ class ReunionRepository(BaseRepository, IReunionRepository):
         ]
 
         return paginated
-    
+
     def update_estado(self, reunion_id: int, nuevo_estado: EstadoReunion) -> Reunion:
-        reunion = self.db.query(Reunion).filter(Reunion.id == reunion_id).first()
+        reunion = self.db.query(Reunion).filter(
+            Reunion.id == reunion_id).first()
 
         if not reunion:
             raise AppException(f"No existe una reunión con ID {reunion_id}")

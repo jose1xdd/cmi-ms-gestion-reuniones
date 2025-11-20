@@ -6,7 +6,7 @@ from app.models.inputs.reunion.reunion_filters import ReunionFilter
 from app.models.inputs.reunion.reunion_update import ReunionUpdate
 from app.models.outputs.paginated_response import PaginatedReunion
 from app.models.outputs.response_estado import EstadoResponse
-from app.models.outputs.reunion.reunion_out import ReunionOut
+from app.models.outputs.reunion.reunion_out import ReunionOut, ReunionesPorEstado
 from app.services.reunion_manager import ReunionManager
 
 
@@ -50,6 +50,18 @@ def listar_reuniones(
     manager: ReunionManager = Depends(get_reunion_manager)
 ):
     return manager.get_all(page, page_size, filters.model_dump(exclude_none=True))
+
+@reunion_router.get(
+    "/estadisticas/por-estado",
+    response_model=ReunionesPorEstado,
+    status_code=status.HTTP_200_OK,
+    summary="Devuelve cuántas reuniones hay por estado (PROGRAMADA, EN_CURSO, CERRADA)"
+)
+def reuniones_por_estado(
+    manager: ReunionManager = Depends(get_reunion_manager)
+):
+    return manager.contar_reuniones_por_estado()
+
 
 
 @reunion_router.put(

@@ -7,7 +7,7 @@ from app.models.outputs.asistencia.asistencia_persona import AsistenciaIndividua
 from app.models.outputs.paginated_response import PaginatedAsistenciaPersonas
 from app.models.outputs.response_estado import EstadoResponse
 from app.persistence.models.asistencia import Asistencia
-from app.persistence.models.enum import EstadoReunion
+from app.persistence.models.reunion import EstadoReunion
 from app.persistence.repository.asistencia_repository.interface.interface_asistencia_repository import IAsistenciaRepository
 from app.persistence.repository.persona_repository.interface.interface_persona_repository import IPersonaRepository
 from app.persistence.repository.reunion_repository.interface.interface_reunion_repository import IReunionRepository
