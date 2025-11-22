@@ -51,7 +51,6 @@ class AsistenciaRepository(BaseRepository, IAsistenciaRepository):
                 (Asistencia.asistenteId == Persona.id) &
                 (Asistencia.reunionId == reunion_id)
             )
-            .filter(Persona.activo.is_(True))
         )
 
         # Aplicar filtros dinámicos
