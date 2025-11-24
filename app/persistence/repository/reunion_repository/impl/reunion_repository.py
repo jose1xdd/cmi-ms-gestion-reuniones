@@ -52,28 +52,6 @@ class ReunionRepository(BaseRepository, IReunionRepository):
         return self.db.query(query.exists()).scalar()
 
     def find_all_reunion(self, page: int, page_size: int, filters: Dict[str, Any]):
-        now = datetime.now()
-
-        # Usamos CASE para calcular el estado dinámicamente
-        estado_case = case(
-            (
-                # COMPLETADA: la reunión terminó antes del momento actual
-                func.timestamp(func.concat(
-                    Reunion.fecha, ' ', Reunion.horaFinal)) < now,
-                EnumEstadoActividad.COMPLETADA,
-            ),
-            (
-                # EN_CURSO: la fecha actual está entre horaInicio y horaFinal
-                and_(
-                    func.timestamp(func.concat(
-                        Reunion.fecha, ' ', Reunion.horaInicio)) <= now,
-                    func.timestamp(func.concat(
-                        Reunion.fecha, ' ', Reunion.horaFinal)) >= now,
-                ),
-                EnumEstadoActividad.EN_CURSO,
-            ),
-            else_=EnumEstadoActividad.PROGRAMADA
-        ).label("estado")
 
         query = (
             self.db.query(
@@ -83,7 +61,7 @@ class ReunionRepository(BaseRepository, IReunionRepository):
                 Reunion.horaInicio,
                 Reunion.horaFinal,
                 Reunion.ubicacion,
-                estado_case
+                Reunion.estado
             )
             .filter_by(**filters)
             .order_by(Reunion.fecha.desc())

@@ -3,6 +3,8 @@ from enum import Enum
 from typing import Optional
 from pydantic import BaseModel
 
+from app.persistence.models.reunion import EstadoReunion
+
 class EnumEstadoActividad(str, Enum):
     PROGRAMADA = "PROGRAMADA"
     EN_CURSO = "EN_CURSO"
@@ -15,7 +17,7 @@ class ReunionOut(BaseModel):
     horaInicio: Optional[time] = None
     horaFinal: Optional[time] = None
     ubicacion: Optional[str] = None
-    estado: Optional[EnumEstadoActividad] = None
+    estado: Optional[EstadoReunion] = None
     class Config:
         from_attributes = True
 
