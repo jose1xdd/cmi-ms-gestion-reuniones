@@ -1,7 +1,6 @@
 from typing import Any, Dict
 from sqlalchemy import func, case, and_
 from sqlalchemy import and_
-from datetime import datetime
 from sqlalchemy.orm import Session
 from app.models.outputs.reunion.reunion_out import EnumEstadoActividad
 from app.persistence.models.reunion import EstadoReunion, Reunion
@@ -53,23 +52,21 @@ class ReunionRepository(BaseRepository, IReunionRepository):
 
     def find_all_reunion(self, page: int, page_size: int, filters: Dict[str, Any]):
 
-        query = (
-            self.db.query(
-                Reunion.id,
-                Reunion.titulo,
-                Reunion.fecha,
-                Reunion.horaInicio,
-                Reunion.horaFinal,
-                Reunion.ubicacion,
-                Reunion.estado
-            )
-            .filter_by(**filters)
-            .order_by(Reunion.fecha.desc())
-        )
+        # Construcción base
+        query = self.db.query(Reunion)
 
+        # Aplicar filtros dinámicos solo si existen
+        for field, value in filters.items():
+            if value is not None:
+                query = query.filter(getattr(Reunion, field) == value)
+
+        # Orden por fecha descendente
+        query = query.order_by(Reunion.fecha.desc())
+
+        # Paginación
         paginated = self.paginate(page, page_size, query)
 
-        # Mapeamos el resultado para salida consistente
+        # Normaliza items para salida consistente
         paginated["items"] = [
             {
                 "id": row.id,

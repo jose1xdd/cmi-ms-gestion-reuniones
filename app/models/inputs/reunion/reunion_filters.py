@@ -11,4 +11,4 @@ class ReunionFilter(BaseModel):
     horaInicio: Optional[time] = None
     horaFinal: Optional[time] = None
     ubicacion: Optional[str] = None
-    reunion: Optional[EstadoReunion] = None
+    estado: Optional[EstadoReunion] = None
