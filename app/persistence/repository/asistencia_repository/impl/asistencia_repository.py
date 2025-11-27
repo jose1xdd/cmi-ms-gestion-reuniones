@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional
 from sqlalchemy.orm import Session
-from sqlalchemy import case
+from sqlalchemy import case, desc
 from app.models.outputs.paginated_response import PaginatedAsistenciaPersonas
 from app.persistence.models.asistencia import Asistencia
 from app.persistence.models.persona import Persona
@@ -49,6 +49,14 @@ class AsistenciaRepository(BaseRepository, IAsistenciaRepository):
                 (Asistencia.reunionId == reunion_id)
             )
             .filter(Persona.fechaDefuncion == None)
+            .order_by(
+                desc(
+                    case(
+                        (Asistencia.id.isnot(None), True),
+                        else_=False
+                    )
+                )
+            )
         )
 
         # Aplicar filtros dinámicos
@@ -64,10 +72,8 @@ class AsistenciaRepository(BaseRepository, IAsistenciaRepository):
         presentes = query.filter(Asistencia.id.isnot(None)).count()
         ausentes = query.filter(Asistencia.id.is_(None)).count()
 
-
         paginated = self.paginate(page, page_size, query)
 
-        
         return PaginatedAsistenciaPersonas(
             total_items=paginated['total_items'],
             current_page=paginated['current_page'],
