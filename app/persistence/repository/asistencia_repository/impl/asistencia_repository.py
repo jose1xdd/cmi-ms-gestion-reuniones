@@ -23,7 +23,6 @@ class AsistenciaRepository(BaseRepository, IAsistenciaRepository):
 
     from typing import Optional
 
-
     def get_personas_with_asistencia(
         self,
         page: int,
@@ -33,9 +32,7 @@ class AsistenciaRepository(BaseRepository, IAsistenciaRepository):
         nombre: Optional[str] = None,
         apellido: Optional[str] = None
     ) -> PaginatedAsistenciaPersonas:
-        """Obtiene todas las personas que tienen usuario y cruza si están en asistencia de la reunión,
-        con filtros opcionales por documento, nombre y apellido.
-        """
+
         query = (
             self.db.query(
                 Persona.id.label("Numero_documento"),
@@ -51,7 +48,7 @@ class AsistenciaRepository(BaseRepository, IAsistenciaRepository):
                 (Asistencia.asistenteId == Persona.id) &
                 (Asistencia.reunionId == reunion_id)
             )
-            .filter(Persona.fechaDefuncion==None)
+            .filter(Persona.fechaDefuncion == None)
         )
 
         # Aplicar filtros dinámicos
@@ -64,4 +61,17 @@ class AsistenciaRepository(BaseRepository, IAsistenciaRepository):
         if apellido:
             query = query.filter(Persona.apellido.ilike(f"%{apellido}%"))
 
-        return self.paginate(page, page_size, query)
+        presentes = query.filter(Asistencia.id.isnot(None)).count()
+        ausentes = query.filter(Asistencia.id.is_(None)).count()
+
+
+        paginated = self.paginate(page, page_size, query)
+
+        
+        return PaginatedAsistenciaPersonas(
+            total_items=paginated['total_items'],
+            current_page=paginated['current_page'],
+            total_pages=paginated['total_pages'],
+            items=paginated['items'],
+            personas_presentes=presentes,
+            personas_ausentes=ausentes)

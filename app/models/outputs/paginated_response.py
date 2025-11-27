@@ -13,6 +13,8 @@ class PaginatedReunion(BaseModel):
 
 
 class PaginatedAsistenciaPersonas(BaseModel):
+    personas_presentes: int
+    personas_ausentes: int
     total_items: int
     current_page: int
     total_pages: int
