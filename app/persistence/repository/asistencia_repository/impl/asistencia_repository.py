@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional
 from sqlalchemy.orm import Session
-from sqlalchemy import case, desc
+from sqlalchemy import case, desc, func, or_
 from app.models.outputs.paginated_response import PaginatedAsistenciaPersonas
 from app.persistence.models.asistencia import Asistencia
 from app.persistence.models.persona import Persona
@@ -28,12 +28,12 @@ class AsistenciaRepository(BaseRepository, IAsistenciaRepository):
         page: int,
         page_size: int,
         reunion_id: int,
-        numero_documento: Optional[str] = None,
-        nombre: Optional[str] = None,
-        apellido: Optional[str] = None
+        query: Optional[str] = None
     ) -> PaginatedAsistenciaPersonas:
 
-        query = (
+        query_str = query.strip() if query else ""
+
+        q = (
             self.db.query(
                 Persona.id.label("Numero_documento"),
                 Persona.nombre.label("Nombre"),
@@ -48,7 +48,7 @@ class AsistenciaRepository(BaseRepository, IAsistenciaRepository):
                 (Asistencia.asistenteId == Persona.id) &
                 (Asistencia.reunionId == reunion_id)
             )
-            .filter(Persona.fechaDefuncion == None)
+            .filter(Persona.fechaDefuncion.is_(None))
             .order_by(
                 desc(
                     case(
@@ -59,20 +59,21 @@ class AsistenciaRepository(BaseRepository, IAsistenciaRepository):
             )
         )
 
-        # Aplicar filtros dinámicos
-        if numero_documento:
-            query = query.filter(Persona.id == numero_documento)
+        # --- FILTRO POR QUERY (documento, nombre, apellido) ---
+        if query_str:
+            like_query = f"%{query_str}%"
+            q = q.filter(
+                or_(
+                    Persona.id.like(like_query),
+                    func.lower(Persona.nombre).like(func.lower(like_query)),
+                    func.lower(Persona.apellido).like(func.lower(like_query)),
+                )
+            )
 
-        if nombre:
-            query = query.filter(Persona.nombre.ilike(f"%{nombre}%"))
+        presentes = q.filter(Asistencia.id.isnot(None)).count()
+        ausentes = q.filter(Asistencia.id.is_(None)).count()
 
-        if apellido:
-            query = query.filter(Persona.apellido.ilike(f"%{apellido}%"))
-
-        presentes = query.filter(Asistencia.id.isnot(None)).count()
-        ausentes = query.filter(Asistencia.id.is_(None)).count()
-
-        paginated = self.paginate(page, page_size, query)
+        paginated = self.paginate(page, page_size, q)
 
         return PaginatedAsistenciaPersonas(
             total_items=paginated['total_items'],
@@ -80,4 +81,5 @@ class AsistenciaRepository(BaseRepository, IAsistenciaRepository):
             total_pages=paginated['total_pages'],
             items=paginated['items'],
             personas_presentes=presentes,
-            personas_ausentes=ausentes)
+            personas_ausentes=ausentes
+        )

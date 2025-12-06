@@ -63,23 +63,18 @@ def user_assign_asistencia(
 )
 def get_personas_with_asistencia(
     reunion_id: int,
-    page: int = Query(1, ge=1, description="Número de página"),
-    page_size: int = Query(
-        10, ge=1, le=100, description="Cantidad de registros por página"),
-    numero_documento: Optional[str] = Query(
-        None, description="Número de documento para filtrar"),
-    nombre: Optional[str] = Query(
-        None, description="Nombre de la persona para filtrar"),
-    apellido: Optional[str] = Query(
-        None, description="Apellido de la persona para filtrar"),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(10, le=100),
+    query: Optional[str] = Query(None, description="Buscar por documento, nombre o apellido"),
     asistencia_manager: AsistenciaManager = Depends(get_asistencia_manager)
 ):
-    return asistencia_manager.get_personas_with_asistencia(page=page,
-                                                           page_size=page_size,
-                                                           reunion_id=reunion_id,
-                                                           numero_documento=numero_documento,
-                                                           nombre=nombre,
-                                                           apellido=apellido)
+    return asistencia_manager.get_personas_with_asistencia(
+        page=page,
+        page_size=page_size,
+        reunion_id=reunion_id,
+        query=query
+    )
+
 
 
 @asistencia_router.get(

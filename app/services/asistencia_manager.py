@@ -36,13 +36,14 @@ class AsistenciaManager:
         if reunion is None:
             self.logger.warning(f"Reunión con ID={reunion_id} no existe")
             raise AppException("Reunión no existe")
-        
+
         if reunion.estado != EstadoReunion.EN_CURSO.value:
             self.logger.warning(
                 f"[AsistenciaManager] ⚠️ Reunión ID={reunion_id} no está en curso (estado actual: {reunion.estado.value})"
             )
-            raise AppException("Solo se puede registrar asistencia mientras la reunión está EN CURSO")
-        
+            raise AppException(
+                "Solo se puede registrar asistencia mientras la reunión está EN CURSO")
+
         asistencia = self.asistencia_repository.get_by_reunion_and_persona(
             reunion_id, data.persona_id)
         if asistencia is not None:
@@ -85,17 +86,19 @@ class AsistenciaManager:
 
         return EstadoResponse(estado="Exitoso", message="Asistencia eliminada exitosamente")
 
-    def user_register_assistance(self,reunion_id: int,data: UserRegisterAsistencia) -> EstadoResponse:
+    def user_register_assistance(self, reunion_id: int, data: UserRegisterAsistencia) -> EstadoResponse:
         """
         Registra la asistencia de un usuario a una reunión usando su número de documento,
         validando que la reunión esté en curso, y envía un correo de confirmación.
         """
-        self.logger.info(f"[AsistenciaManager] 📝 Registro de asistencia - Reunión ID={reunion_id}")
+        self.logger.info(
+            f"[AsistenciaManager] 📝 Registro de asistencia - Reunión ID={reunion_id}")
 
         # 1️⃣ Validar que la reunión exista
         reunion = self.reunion_repository.get(reunion_id)
         if not reunion:
-            self.logger.warning(f"[AsistenciaManager] ❌ Reunión ID={reunion_id} no existe")
+            self.logger.warning(
+                f"[AsistenciaManager] ❌ Reunión ID={reunion_id} no existe")
             raise AppException("No existe esa reunión")
 
         # 2️⃣ Validar que la reunión esté en curso
@@ -103,7 +106,8 @@ class AsistenciaManager:
             self.logger.warning(
                 f"[AsistenciaManager] ⚠️ Reunión ID={reunion_id} no está en curso (estado actual: {reunion.estado.value})"
             )
-            raise AppException("Solo se puede registrar asistencia mientras la reunión está EN CURSO")
+            raise AppException(
+                "Solo se puede registrar asistencia mientras la reunión está EN CURSO")
 
         # 3️⃣ Buscar persona por documento
         persona = self.persona_repository.get(data.numero_documento)
@@ -111,15 +115,18 @@ class AsistenciaManager:
             self.logger.warning(
                 f"[AsistenciaManager] ❌ Persona con documento {data.numero_documento} no encontrada"
             )
-            raise AppException("No existe ninguna persona con ese número de documento")
+            raise AppException(
+                "No existe ninguna persona con ese número de documento")
 
         # 4️⃣ Validar si ya registró asistencia
         asistencia_existente = self.asistencia_repository.get_by_reunion_and_persona(
             reunion_id, persona.id
         )
         if asistencia_existente:
-            self.logger.info(f"[AsistenciaManager] ⚠️ Ya existe asistencia para persona {persona.id}")
-            raise AppException("Ya registraste la asistencia para esta reunión")
+            self.logger.info(
+                f"[AsistenciaManager] ⚠️ Ya existe asistencia para persona {persona.id}")
+            raise AppException(
+                "Ya registraste la asistencia para esta reunión")
 
         # 5️⃣ Registrar asistencia
         self.asistencia_repository.create(
@@ -145,37 +152,35 @@ class AsistenciaManager:
             hora=hora,
             ubicacion=reunion.ubicacion or "No especificada",
         )
-        
+
         return EstadoResponse(
             estado="Exitoso",
             message=f"Asistencia registrada exitosamente para {data.nombre_completo}",
         )
 
     def get_personas_with_asistencia(
-        self, page: int,
+        self,
+        page: int,
         page_size: int,
         reunion_id: int,
-        numero_documento: Optional[str] = None,
-        nombre: Optional[str] = None,
-        apellido: Optional[str] = None
+        query: Optional[str] = None
     ) -> PaginatedAsistenciaPersonas:
+
         self.logger.info(
-            f"Consultando personas con asistencia: reunion_id={reunion_id}, page={page}, page_size={page_size}"
+            f"[AsistenciaManager] Consultando personas: reunion_id={reunion_id}, query='{query}'"
         )
 
-        # Validar reunión
         reunion = self.reunion_repository.get(reunion_id)
-        if reunion is None:
-            self.logger.warning(f"Reunión con ID={reunion_id} no existe")
+        if not reunion:
+            self.logger.warning(
+                f"[AsistenciaManager] Reunión {reunion_id} no existe")
             raise AppException("Reunión no existe")
 
         result = self.asistencia_repository.get_personas_with_asistencia(
             page=page,
             page_size=page_size,
             reunion_id=reunion_id,
-            numero_documento=numero_documento,
-            nombre=nombre,
-            apellido=apellido
+            query=query
         )
 
         return result

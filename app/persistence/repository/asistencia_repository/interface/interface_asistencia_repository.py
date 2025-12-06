@@ -17,8 +17,6 @@ class IAsistenciaRepository(IBaseRepository[Asistencia, int], ABC):
         page: int,
         page_size: int,
         reunion_id: int,
-        numero_documento: Optional[str] = None,
-        nombre: Optional[str] = None,
-        apellido: Optional[str] = None
+        query: Optional[str] = None
     ) -> PaginatedAsistenciaPersonas:
         pass
