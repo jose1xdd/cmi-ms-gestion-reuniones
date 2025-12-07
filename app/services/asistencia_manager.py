@@ -144,9 +144,10 @@ class AsistenciaManager:
             if reunion.horaInicio and reunion.horaFinal
             else "No especificada"
         )
+        nombre_completo =f"{persona.nombre} {persona.apellido}"
         self.email_service.send_email_asistencia(
             destinatary=data.correo_electronico,
-            nombre=data.nombre_completo,
+            nombre=nombre_completo,
             titulo=reunion.titulo or "Reunión Comunitaria",
             fecha=fecha,
             hora=hora,
@@ -155,7 +156,7 @@ class AsistenciaManager:
 
         return EstadoResponse(
             estado="Exitoso",
-            message=f"Asistencia registrada exitosamente para {data.nombre_completo}",
+            message=f"Asistencia registrada exitosamente para {nombre_completo}",
         )
 
     def get_personas_with_asistencia(
