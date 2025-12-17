@@ -1,6 +1,6 @@
 # Usa la imagen base de Python 3.11 Slim
 FROM python:3.11-slim
-
+ENV TZ=America/Bogota
 # Establece el directorio de trabajo dentro del contenedor
 WORKDIR /app
 
