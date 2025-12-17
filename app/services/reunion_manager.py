@@ -9,6 +9,7 @@ from app.persistence.models.reunion import EstadoReunion, Reunion
 from app.persistence.repository.reunion_repository.interface.interface_reunion_repository import IReunionRepository
 from app.utils.exceptions_handlers.models.error_response import AppException
 from app.utils.util_functions import generate_code
+from zoneinfo import ZoneInfo
 
 
 class ReunionManager:
@@ -16,12 +17,16 @@ class ReunionManager:
         self.logger = logger
         self.reunion_repository = reunion_repository
 
+
     def _validar_hora_actual(self, fecha, hora: time, accion: str):
         """Valida que la hora no sea anterior a la actual si la fecha es hoy"""
-        ahora = datetime.now()
+        ahora = datetime.now(tz=ZoneInfo("America/Bogota"))
+
         if fecha == ahora.date() and hora < ahora.time():
             raise AppException(
-                f"No se puede {accion} una reunión con hora anterior a la actual")
+                f"No se puede {accion} una reunión con hora anterior a la actual"
+            )
+
 
     def create(self, data: ReunionCreate) -> EstadoResponse:
         self.logger.info(f"Intentando crear reunión: {data.titulo} "
