@@ -35,3 +35,6 @@ class EnumEscolaridad(Enum):
     SE = "SE"   # Secundaria
     UN = "UN"   # Universitaria
 
+class EnumEstadoFamilia(str, Enum):
+    ACTIVA = "ACTIVA"
+    INACTIVA = "INACTIVA"
