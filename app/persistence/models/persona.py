@@ -30,6 +30,7 @@ class Persona(Base):
     # Relaciones
     parcialidad = relationship("Parcialidad", back_populates="personas")
     usuario = relationship("Usuario", back_populates="persona", uselist=False)
+    asistencias = relationship("Asistencia", back_populates="persona", cascade="all, delete-orphan")
 
     # Relación indirecta a Familia
     familias = relationship(
