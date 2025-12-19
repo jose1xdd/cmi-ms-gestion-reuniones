@@ -7,6 +7,6 @@ from app.persistence.models.persona import Persona
 from app.persistence.models.familia import Familia
 from app.persistence.models.miembro_familia import MiembroFamilia
 from app.persistence.models.usuario import Usuario
-
+from app.persistence.models.asistencia import Asistencia
 # Exportar todo
-__all__ = ['Base', 'Parcialidad', 'Persona', 'Familia', 'MiembroFamilia', 'Usuario']
+__all__ = ['Base', 'Parcialidad', 'Persona', 'Familia', 'MiembroFamilia', 'Usuario','Asistencia']
